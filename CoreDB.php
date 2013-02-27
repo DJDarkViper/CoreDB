@@ -1,12 +1,11 @@
 <?
 /*
+	CoreDB
+	A "CoreData" inspired managed object SQLLess wrapper for SQLite3
+	Written by: Kyle Harrison
+	http://kyleharrison.ca
 
-
-
-
-
-
-
+	See: README.md for examples
 */
 
 // This function might actually be useless, we'll see.. or could be the Context, havent decided
@@ -166,8 +165,19 @@ class CoreContext {
 
 	}
 
+	/**
+	* 
+	*/
 	public function executeFetchRequest(CoreFetchRequest $request) {
 
 	}
+
+	/**
+	* Gathers all Inserts, Updates, and Deletions, builds the series of queries, and executes them one by one
+	*/
+	public function save() {
+
+	}
+
 
 }
