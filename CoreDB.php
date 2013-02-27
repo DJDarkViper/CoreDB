@@ -31,22 +31,41 @@ class CoreError {
 	}
 }
 
-class CorePredicate {
-
+class CorePredicateCondition {
 	const EQUALS = "=";
 	const DOES_NOT_EQUAL = "!=";
 	const LIKE 	 = "LIKE";
+}
 
-	const GLUE_AND = " AND ";
-	const GLUE_OR  = " OR ";
-	
+class CorePredicateGlue {
+	const AND = " AND ";
+	const OR  = " OR ";
+}
+
+class CorePredicate {
+
+	// Property to condition against
 	private $property = null;
+	
+	// The Conditional to compare with
 	private $conditional = null;
+	
+	// What the property should or should not be (depending on conditional)
 	private $value = null;
 
+	// If multiple Predicates are present, this glue can (and will) be used and THEN this predicate is written
 	private $glue = null;
 
-	function CoreCondition($property, $value, $conditional = self::EQUALS, $glue = null) {
+	/**
+	* Creates a new Filter Predication (Conditional)
+	* @property String $property The property/field name
+	* @property String $value the value of the property to match against
+	* @property Const $conditional The conditional representaiton to argue the value vs. the property with
+	* @property Const $glue If multiple predicates are presented, this is the condition this predicate should be used in sequence 
+	* @example new CorePredicate("id", 1); // would equal: WHERE `id` = 1;
+	* @example array(new CorePredicate("firstname", "Ron%", CorePredicate::LIKE), new CorePredicate("lastname", "Howard", CorePredicateCondition::EQUALS, CorePredicateGlue::AND)); // equivilent to: WHERE `firstname` LIKE "Ron%" AND `lastname` = "Howard"
+	*/
+	function CorePredicate($property, $value, $conditional = CorePRedicateCondition::EQUALS, $glue = CorePredicateGlue::AND) {
 		$this->setField($property);
 		$this->setValue($value);
 		$this->setConditional($conditional);
@@ -62,12 +81,17 @@ class CorePredicate {
 
 class CoreSortDescriptor {
 
-	const ASCENDING = 1;
-	const DESCENDING = 2;
+	const ASCENDING = "ASC";
+	const DESCENDING = "DESC";
 
 	private $property = null;
 	private $direction = null;
 
+	/**
+	* Creates a new Sorting Description
+	* @property String $property a string representation of the property (field) to sort by
+	* @property Const $withDirection a String representation of the direction of the sort: ASCENDING / DESCENDING
+	*/
 	function CoreSort($property, $withDirection = self::ASCENDING) {
 		$this->setProperty($property);
 		$this->setDirection($withDirection);
@@ -100,10 +124,17 @@ class CoreFetchRequest {
 	private $page  = null;
 
 
-	function CoreFetch($withEntityName) {
-
+	/**
+	* Creates a new CoreDB Fetch Request
+	* @property String $withEntityName the name of the Entity to request data from
+	*/
+	function CoreFetch($withEntityName = null) {
+		$this->setEntity($withEntityName);
 	}
 
+	/**
+	* Sets/Overrides the specified Entity (table)
+	*/
 	public function setEntity($entityName) {
 		$this->entity = $entityName; 
 		return $this;
@@ -114,7 +145,7 @@ class CoreFetchRequest {
 	* @property $sort CoreSortDescriptor a single sort descriptor object
 	*/
 	public function setSortDescriptor(CoreSortDescriptor $sort) {
-
+		$this->descriptors = array($sort);
 		return $this;
 	}
 
@@ -123,34 +154,56 @@ class CoreFetchRequest {
 	* @property $predicate CorePredicate a single predicate object (condition)
 	*/
 	public function setPredicate(CorePredicate $predicate) {
-
+		$this->predicates = array($predicate);
 		return $this;
 	}
 
 	/**
 	* Sets/Overrides existing Sorting descroption with a series of of new Sort descroptions
-	* @property $sortDescriptors An array of Sort Descriptors, requires a Glue
+	* @property $sortDescriptors An array of Sort Descriptors. Any object that is not a CoreSortDescriptor object will be ignored.
 	*/
 	public function setSortDescriptors($sortDescriptors) {
-
+		$this->descriptors = array();
+		foreach($sortDescriptors as $desc) if(get_class($desc) == "CoreSortDescriptor") $this->descriptors[] = $desc;
 		return $this;
 	}
 
+	/**
+	* Sets/Overrides existing filter predicates (conditionals)
+	* @property $predicates An array of CorePredicates. Any object that is not a CorePredicate object will be ignored.
+	*/
 	public function setPredicates($predicates) {
-
+		$this->predicates = array();
+		foreach($predicates as $p) if(get_class($p) == "CorePredicate") $this->predicates = $p;
 		return $this;
 	}
 
-	public function setPropertiesToFetch($array = array("*")) {
-
+	/**
+	* Sets/Overrides the precise properties (fields) to fetch. If not used, default "*" will be used.
+	* @property $properties Array an array of strings with property (field) names
+	*/
+	public function setPropertiesToFetch($properties = array("*")) {
+		$this->properties = $properties;
 		return $this;
 	}
 
+	/**
+	* Sets/Overrides a limit of records to fetch
+	* @property $integer int The limit of records to fetch as a number
+	*/
 	public function setFetchLimit($integer) {
 		$this->limit = $integer;
 		return $this;
 	}
 
+	/**
+	* Sets/Overrides a page for automatic record offsetting
+	* @property $integer int the explicit page number. If not used, will not take any effect.
+	*/
+	public function setPage($integer) {
+		$this->page = $integer;
+		return $this;
+	}
 
 
 }
