@@ -1,6 +1,12 @@
 CoreDB
 ======
 
+
+STATUS
+-------
+**IN DEVELOPMENT, UNRELEASED. ACCEPTING CONTRIBUTIONS.**
+
+
 An Introduction
 ---------------
 
