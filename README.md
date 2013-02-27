@@ -12,6 +12,8 @@ Installation
 
 Download the latest stable version. You only need CoreDB.php, place it pretty much anywhere. Done.
 
+I highly recommend using tools like NaviCat Premium, NaviCat for SQLite, or PHPLiteAdmin.php to create and manage the structure of your SQLite databases easier. 
+
 
 Usage
 -----
@@ -22,11 +24,12 @@ The pattern is that for each "table" (aka: *Entity*), there is a class with prop
 
 Lets pretend we have a _Users_ entity (table) with the properties as follows:
 
+```
 id INTEGER PRIMARY AUTO INCREMENT,
 username TEXT NOT NULL,
 password TEXT NOT NULL,
 email TEXT NOT NULL
-
+```
 
 we would have an class like this:
 ```
@@ -41,5 +44,6 @@ class Users extends CoreDBModel {
 	//// ... feel free to add your getters and setters here
 
 }
-
 ```
+
+
