@@ -307,7 +307,7 @@ class CoreContext {
 	/**
 	* Gathers all Inserts, Updates, and Deletions, builds the series of queries, and executes them one by one
 	*/
-	public function save() {
+	public function save($autoclean = false) {
 
 		// Compile all queries
 		$sqls = array();
@@ -350,22 +350,26 @@ class CoreContext {
 			$sqls[] = $sql;
 		}
 
-
-
-		//var_dump($sqls);
-
-		foreach($sqls as $query) {
+		foreach($sqls as $index=>$query) {
 
 			//echo "Executing: $query";
 			$this->store->exec($query);
 
 		}
 
+		// models are retained unless autoclean is set to true
+		if($autoclean) $this->clear();
+
 	}
 
 
 	public function addModel($ref) {
 		$this->models[] = $ref;
+	}
+
+
+	public function clear() {
+		$this->models = array();
 	}
 
 }
