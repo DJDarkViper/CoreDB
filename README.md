@@ -2,9 +2,12 @@ CoreDB
 ======
 
 
-STATUS
+Status
 -------
-**IN DEVELOPMENT, UNRELEASED. ACCEPTING CONTRIBUTIONS.**
+
+Release Status: **BETA**
+
+**IN DEVELOPMENT, and ACCEPTING CONTRIBUTIONS at all times.**
 
 
 An Introduction
