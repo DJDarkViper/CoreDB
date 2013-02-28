@@ -37,7 +37,7 @@ The pattern is that for each "table" (aka: *Entity*), there is a class with prop
 Lets pretend we have a _Users_ entity (table) with the properties as follows (in pseudoQL):
 
 ```
-id INTEGER PRIMARY AUTO INCREMENT,
+id INTEGER PRIMARY KEY,
 username TEXT NOT NULL,
 password TEXT NOT NULL,
 email TEXT NOT NULL
@@ -46,18 +46,16 @@ email TEXT NOT NULL
 we would have an class like this:
 ```
 // Users.model.php
-class Users extends CoreDBModel {
+class Users extends CoreModel {
 
-	public $id 			= null;
-	public $username 	= null;
-	public $password	= null;
-	public $email		= null;
+	public $username;
+	public $password;
+	public $email;
 
 	// This construct is required
 	public function __construct(CoreContext $context) {
-		parent::__construct($this);
+		parent::__construct(&$context);
 	}
-
 
 	//// ... feel free to add your getters and setters here
 
@@ -68,8 +66,7 @@ If you wish to insert a new object to the database, we could do something such a
 
 ```
 // Initialize a new Context (established connection)
-define(DATASTORE_PATH, "./");
-$context = new CoreContext(DATASTORE_PATH."example"); // looks for and establishes a connection to "./example.sqlite", if it does not exist, one will be created
+$context = new CoreContext("stores/example"); // looks for and establishes a connection to "/stores/example.sqlite", if it does not exist, one will be created
 
 // Create a new User
 $user1 = new Users(&$context);
