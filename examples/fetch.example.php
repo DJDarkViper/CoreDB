@@ -59,30 +59,52 @@ $context->save();
 
 $context->clear(); // cleanup
 
+
 ///
 ///  Now we have some data in the database, lets fetch some
 ///
 echo "<pre>";
+echo "<b>Get All as is</b><br />";
 // Lets fetch ALL records with default settings
 $records = $context->executeFetchRequest(new CoreFetchRequest("Users"));
 
-
 var_dump($records);
 
+echo "<br /><br /><b>Get Just 'John's</b><br />";
 
 $fetch = new CoreFetchRequest("Users");
 $fetch->setPredicate( new CorePredicate("first","John") );
-$fetch->setSortDescriptor( new CoreSortDescriptor("last", CoreSort::ASCENDING) );
-$records2 = $context->executeFetchRequest($fetch);
+$records = $context->executeFetchRequest($fetch);
 
-var_dump($records2);
+var_dump($records);
 
+echo "<br /><br /><b>Get All order by last name ascending</b><br />";
 
+$fetch = new CoreFetchRequest("Users");
+$fetch->setSortDescriptor(new CoreSortDescriptor("last", CoreSort::ASCENDING));
+$records = $context->executeFetchRequest($fetch);
 
+var_dump($records);
 
+echo "<br /><br /><b>Get Everyone with an 'a' in the last name, order by last name descending</b><br />";
 
+$fetch = new CoreFetchRequest("Users");
+$fetch->setPredicate( new CorePredicate("last","%a%", CorePredicateCondition::LIKE) );
+$fetch->setSortDescriptor( new CoreSortDescriptor("last", CoreSort::DESCENDING) );
+$records = $context->executeFetchRequest($fetch);
 
+var_dump($records);
 
+echo "<br /><br /><b>Get Everyone with an 'a' in the last name and ends with 'k', order by last name descending</b><br />";
 
+$fetch = new CoreFetchRequest("Users");
+$fetch->setPredicates( array(
+		new CorePredicate("last", "%a%", CorePredicateCondition::LIKE),
+		new CorePredicate("last", "%k", CorePredicateCondition::LIKE, CorePredicateGlue::GLUE_AND)
+	) 
+);
+$fetch->setSortDescriptor( new CoreSortDescriptor("last", CoreSort::DESCENDING) );
+$records = $context->executeFetchRequest($fetch);
 
+var_dump($records);
 
