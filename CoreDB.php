@@ -21,12 +21,22 @@ class CoreDB {
 
 
 	public static function CreateEntity($context, CoreEntityDescription $entity) {
-		$sql = "DROP TABLE IF EXISTS ".$entity->name.";";
-
 		$store = $context->getStore();
-		
-		
 
+		$store->exec("DROP TABLE IF EXISTS ".$entity->name);
+
+		$sql = "CREATE TABLE ".$entity->name." (";
+
+		$props = array();
+		foreach($entity->properties as $property)
+			$props[] = $property->name . " " . $property->type . (($property->primary)? " PRIMARY KEY" : null );
+
+		$sql .= implode(",
+			", $props);
+
+		$sql .= ")";
+
+		$store->exec($sql);
 
 		return $entity;
 	}
@@ -37,7 +47,7 @@ class CoreEntityDescription {
 	public $name;
 	public $properties = array();
 
-	function CoreEntityDescription($name, $properties = null) {
+	function CoreEntityDescription($name, $properties = array()) {
 		$this->name = $name;
 		$this->properties = $properties;
 	}
@@ -47,7 +57,7 @@ class CoreEntityDescription {
 		return $this;
 	}
 
-	public static function Create($name, $properties = null) {
+	public static function Create($name, $properties = array()) {
 		return new CoreEntityDescription($name, $properties);
 	} 
 }
