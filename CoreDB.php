@@ -309,8 +309,6 @@ class CoreContext {
 	*/
 	public function save() {
 
-		var_dump("From Save");
-		
 		// Compile all queries
 		$sqls = array();
 
@@ -344,7 +342,7 @@ class CoreContext {
 					if($key != "id") // we do not want to include the ID in the update list
 						$parts[] = $key."=".((is_int($property))? $property : "'".$property."'" );
 				
-				$sql .= " ".implode(", ", $parts)." WHERE id=".$model->id;
+				$sql .= " SET ".implode(", ", $parts)." WHERE id=".$model->id;
 
 			}
 
@@ -358,7 +356,7 @@ class CoreContext {
 
 		foreach($sqls as $query) {
 
-			echo "Executing: $query";
+			//echo "Executing: $query";
 			$this->store->exec($query);
 
 		}
