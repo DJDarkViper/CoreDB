@@ -307,7 +307,7 @@ class CoreContext {
 	*/
 	function CoreContext($DatabasePath) {
 
-		$path = $_SERVER['DOCUMENT_ROOT']."/".$DatabasePath.".sqlite";
+		$path = $_SERVER['DOCUMENT_ROOT']."/".$DatabasePath.".coredb";
 		$this->store = new SQLite3($path, SQLITE3_OPEN_READWRITE|SQLITE3_OPEN_CREATE);
 		@chmod($path, 0777); // attempt to ensure the file is writable
 
