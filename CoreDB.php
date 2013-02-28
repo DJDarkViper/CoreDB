@@ -19,6 +19,71 @@ class CoreDB {
 		return new CoreContext($DatabasePath);
 	}
 
+
+	public static function CreateEntity($context, CoreEntityDescription $entity) {
+		$store = $context->getStore();
+
+		$store->exec("DROP TABLE IF EXISTS ".$entity->name);
+
+		$sql = "CREATE TABLE ".$entity->name." (";
+
+		$props = array();
+		foreach($entity->properties as $property)
+			$props[] = $property->name . " " . $property->type . (($property->primary)? " PRIMARY KEY" : null );
+
+		$sql .= implode(",
+			", $props);
+
+		$sql .= ")";
+
+		$store->exec($sql);
+
+		return $entity;
+	}
+
+}
+
+class CoreEntityDescription {
+	public $name;
+	public $properties = array();
+
+	function CoreEntityDescription($name, $properties = array()) {
+		$this->name = $name;
+		$this->properties = $properties;
+	}
+
+	public function addProperty(CoreEntityProperty $property) {
+		$this->properties[] = $property;
+		return $this;
+	}
+
+	public static function Create($name, $properties = array()) {
+		return new CoreEntityDescription($name, $properties);
+	} 
+}
+
+class CoreEntityProperty {
+
+	const TEXT = "TEXT";
+	const NUMBER = "INTEGER";
+	const BLOB = "BLOB";
+	const DATE = "TEXT";
+
+	public $name;
+	public $type;
+	public $primary = false;
+
+	function CoreEntityProperty($name = null, $type = null, $primary = false) {
+		$this->setName($name)->setType($type)->setPrimary($primary);
+	}
+
+	public function setName($str) { $this->name = $str; return $this; }
+	public function setType($const) { $this->type = $const; return $this; }
+	public function setPrimary($bool = true) { $this->primary = $bool; return $this; }
+
+	public static function Create($name = null, $type = null, $primary = false) {
+		return new CoreEntityProperty($name, $type, $primary);
+	}
 }
 
 class CoreError {
@@ -226,6 +291,8 @@ class CoreContext {
 
 	}
 
+	public function getStore() { return $this->store; }
+
 	/**
 	* 
 	*/
@@ -241,4 +308,6 @@ class CoreContext {
 	}
 
 }
+
+
 

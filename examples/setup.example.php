@@ -5,3 +5,5 @@ require_once '../CoreDB.php';
 $context = CoreDB::CreateContext("stores/setup");
 
 // This should be all the setup required.
+
+var_dump($context);
