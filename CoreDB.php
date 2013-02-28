@@ -107,8 +107,8 @@ class CorePredicateCondition {
 }
 
 class CorePredicateGlue {
-	const GLUEAND = " AND ";
-	const GLUEOR  = " OR ";
+	const GLUE_AND = " AND ";
+	const GLUE_OR  = " OR ";
 }
 
 class CorePredicate {
@@ -134,7 +134,7 @@ class CorePredicate {
 	* @example new CorePredicate("id", 1); // would equal: WHERE `id` = 1;
 	* @example array(new CorePredicate("firstname", "Ron%", CorePredicate::LIKE), new CorePredicate("lastname", "Howard", CorePredicateCondition::EQUALS, CorePredicateGlue::AND)); // equivilent to: WHERE `firstname` LIKE "Ron%" AND `lastname` = "Howard"
 	*/
-	function CorePredicate($property, $value, $conditional = CorePRedicateCondition::EQUALS, $glue = CorePredicateGlue::GLUEAND) {
+	function CorePredicate($property, $value, $conditional = CorePRedicateCondition::EQUALS, $glue = CorePredicateGlue::GLUE_AND) {
 		$this->setProperty($property);
 		$this->setValue($value);
 		$this->setConditional($conditional);
@@ -253,7 +253,7 @@ class CoreFetchRequest {
 	*/
 	public function setPredicates($predicates) {
 		$this->predicates = array();
-		foreach($predicates as $p) if(get_class($p) == "CorePredicate") $this->predicates = $p;
+		foreach($predicates as $p) if(get_class($p) == "CorePredicate") $this->predicates[] = $p;
 		return $this;
 	}
 
@@ -300,12 +300,16 @@ class CoreContext {
 
 	private $deletes = array();
 
+	private $queries = array();
+
 	/**
 	* Establishes a connection to the sqlite3 database
 	*/
 	function CoreContext($DatabasePath) {
 
-		$this->store = new SQLite3($_SERVER['DOCUMENT_ROOT']."/".$DatabasePath.".sqlite", SQLITE3_OPEN_READWRITE|SQLITE3_OPEN_CREATE);
+		$path = $_SERVER['DOCUMENT_ROOT']."/".$DatabasePath.".sqlite";
+		$this->store = new SQLite3($path, SQLITE3_OPEN_READWRITE|SQLITE3_OPEN_CREATE);
+		@chmod($path, 0777); // attempt to ensure the file is writable
 
 	}
 
@@ -329,9 +333,9 @@ class CoreContext {
 
 		// check predicates
 		if(count($request->getPredicates())>0) {
-			
+
 			$predicates = array();
-			foreach($request->getPredicates() as $count=>$predicate)
+			foreach($request->getPredicates() as $count=>$predicate) 
 				$predicates[] = (( $count >= 1 )? $predicate->getGlue()." " : null ).$predicate->getProperty()." ".$predicate->getConditional()." ".((is_int($predicate->getValue))? $predicate->getValue() : "'".$predicate->getValue()."'" );
 			
 			$sql .= " WHERE ".implode(" ", $predicates);
@@ -349,8 +353,11 @@ class CoreContext {
 
 		
 		// execute the query
-
 		$sql = $this->store->query($sql);
+
+
+		// tracking
+		$this->queries[] = $sql;
 
 		$return = array();
 		while($rec = $sql->fetchArray(SQLITE3_ASSOC)) {
@@ -436,6 +443,9 @@ class CoreContext {
 
 			//echo "Executing: $query";
 			$this->store->exec($query);
+
+			// tracking
+			$this->queries[] = $query;
 
 		}
 
