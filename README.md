@@ -30,17 +30,19 @@ I highly recommend using tools like [Navicat Premium](http://www.navicat.com/en/
 Usage
 -----
 
-CoreDB is a SQLess wrapper for SQLite3 Databases. That means that CoreDB will manage all operations of your sites communication with stored data via "Managed Obejct" structs. 
+CoreDB is a SQLess wrapper for SQLite3 Databases. That means that CoreDB will manage all operations of your sites communication with stored data via "Managed Object" structs. 
 
 The pattern is that for each "table" (aka: *Entity*), there is a class with properties that matches the structure of the Entities properties (fields).
 
-Lets pretend we have a _Users_ entity (table) with the properties as follows (in pseudoQL):
+Lets pretend we have a _Users_ entity (table) with the properties as follows (in sqlite):
 
 ```
-id INTEGER PRIMARY KEY,
-username TEXT NOT NULL,
-password TEXT NOT NULL,
-email TEXT NOT NULL
+CREATE TABLE Users (
+	id INTEGER PRIMARY KEY,
+	username TEXT NOT NULL,
+	password TEXT NOT NULL,
+	email TEXT NOT NULL
+);
 ```
 
 we would have an class like this:
@@ -78,3 +80,4 @@ $user1->email = "dave@davesworld.com";
 $context->save();
 
 ```
+
