@@ -274,6 +274,10 @@ class CoreFetchRequest {
 		return $this;
 	}
 
+	public function getEntity() { return $this->entity; }
+	public function getPropertes() { return $this->properties; }
+	public function getDescriptors() { return $this->descriptors; }
+	public function getPredicates() { return $this->predicates; }
 
 }
 
@@ -301,6 +305,39 @@ class CoreContext {
 	* 
 	*/
 	public function executeFetchRequest(CoreFetchRequest $request) {
+		/// prepare select
+		$sql = "SELECT ";
+
+		// get selected properties
+		if(count($request->getPropertes())>0) 
+			$sql .= implode(", ", $request->getPropertes());
+		else
+			$sql .= "*";
+
+		$sql .= " FROM ".$request->getEntity();
+
+		// check predicates
+		if(count($request->getPredicates())>0) {
+			
+			$predicates = array();
+			foreach($request->getPredicates() as $count=>$predicate)
+				$predicates[] = (( $count >= 1 )? $predicate->glue." " : null ).$predicate->field." ".$predicate->conditional." ".$predicate->value;
+			
+			$sql .= " WHERE ".implode(" ", $predicates);
+
+		}
+
+		if(count($request->getDescriptors())>0) {
+
+			$descriptors = array();
+			foreach($request->getDescriptors() as $sort)
+				$descriptors[] = $sort->property." ".$sort->direction;
+
+			$sql .= " ORDER BY ".implode(",", $descriptors);
+		}
+
+		return $sql;
+
 
 	}
 
