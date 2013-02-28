@@ -312,6 +312,18 @@ class CoreContext {
 		var_dump("From Save");
 		var_dump($this->models);
 
+		// Compile all queries
+		$sqls = array();
+
+		foreach($this->models as $model) {
+
+			$sql = (($model->id)? "UPDATE" : "INSERT INTO")." ".get_class($model);
+
+			$sqls[] = $sql;
+		}
+
+		var_dump($sqls);
+
 	}
 
 
@@ -322,6 +334,8 @@ class CoreContext {
 }
 
 class CoreModel {
+
+	public $id;
 
 	public function __construct(CoreContext $context) {
 		$context->addModel(&$this);

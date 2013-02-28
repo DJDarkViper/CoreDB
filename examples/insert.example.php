@@ -16,15 +16,14 @@ $db = CoreDB::CreateEntity(&$context,
 
 echo "<pre>";
 
-
 class Example extends CoreModel {
 
-	public $id;
 	public $name;
 
 	function __construct(CoreContext $context) {
 		parent::__construct(&$context);
 	}
+
 }
 
 
@@ -32,6 +31,7 @@ $example = new Example(&$context);
 $example->name = "John";
 
 $example2 = new Example(&$context);
+$example2->id = 2;
 $example2->name = "Sweeny";
 
 $context->save();
