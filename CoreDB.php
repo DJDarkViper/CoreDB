@@ -282,6 +282,10 @@ class CoreContext {
 
 	private $store;
 
+	private $models = array();
+
+	private $deletes = array();
+
 	/**
 	* Establishes a connection to the sqlite3 database
 	*/
@@ -305,9 +309,74 @@ class CoreContext {
 	*/
 	public function save() {
 
+		// Compile all queries
+		$sqls = array();
+
+		// Go through each collected model, and create their specific SQL statements
+		foreach($this->models as $model) {
+
+			// Determine if this is a INSERT or UPDATE statment
+			$sql = ((!$model->id)? "INSERT INTO" : "UPDATE")." ".get_class($model);
+
+			// the hard part, the automatic structure
+			if(!$model->id) {	
+
+				// insert
+				
+				$keys = array();
+				$values = array();
+				foreach($model as $key=>$property)
+					if($key != "id") { // pointless but we dont want the ID to be in here
+						$keys[] = $key;
+						$values[] = ((is_int($property))? $property : "'".$property."'" );
+					}
+				
+				$sql .= " (".implode(",", $keys).") VALUES (".implode(", ", $values).")";
+
+			} else {
+
+				// update
+				
+				$parts = array();
+				foreach($model as $key=>$property)
+					if($key != "id") // we do not want to include the ID in the update list
+						$parts[] = $key."=".((is_int($property))? $property : "'".$property."'" );
+				
+				$sql .= " SET ".implode(", ", $parts)." WHERE id=".$model->id;
+
+			}
+
+			// stash the query into the queue
+			$sqls[] = $sql;
+		}
+
+
+
+		//var_dump($sqls);
+
+		foreach($sqls as $query) {
+
+			//echo "Executing: $query";
+			$this->store->exec($query);
+
+		}
+
+	}
+
+
+	public function addModel($ref) {
+		$this->models[] = $ref;
 	}
 
 }
 
+class CoreModel {
 
+	public $id;
+
+	public function __construct(CoreContext $context) {
+		$context->addModel(&$this);
+	}
+
+}
 
