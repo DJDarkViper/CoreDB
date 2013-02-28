@@ -67,3 +67,21 @@ $context->clear(); // cleanup
 $records = $context->executeFetchRequest(new CoreFetchRequest("Users"));
 
 var_dump($records);
+
+
+$fetch = new CoreFetchRequest("Users");
+$fetch->setPredicate( new CorePredicate("first","John") );
+$fetch->setSortDescriptor( new CoreSortDescriptor("last", CoreSort::ASCENDING) );
+$records2 = $context->executeFetchRequest($fetch);
+
+var_dump($records2);
+
+
+
+
+
+
+
+
+
+

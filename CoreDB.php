@@ -1,11 +1,11 @@
 <?
 /*
-	CoreDB
-	A "CoreData" inspired managed object SQLLess wrapper for SQLite3
-	Written by: Kyle Harrison
-	http://kyleharrison.ca
+CoreDB
+A "CoreData" inspired managed object SQLLess wrapper for SQLite3
+Written by: Kyle Harrison
+http://kyleharrison.ca
 
-	See: README.md for examples
+See: README.md for examples
 */
 
 // This function might actually be useless, we'll see.. or could be the Context, havent decided
@@ -135,7 +135,7 @@ class CorePredicate {
 	* @example array(new CorePredicate("firstname", "Ron%", CorePredicate::LIKE), new CorePredicate("lastname", "Howard", CorePredicateCondition::EQUALS, CorePredicateGlue::AND)); // equivilent to: WHERE `firstname` LIKE "Ron%" AND `lastname` = "Howard"
 	*/
 	function CorePredicate($property, $value, $conditional = CorePRedicateCondition::EQUALS, $glue = CorePredicateGlue::GLUEAND) {
-		$this->setField($property);
+		$this->setProperty($property);
 		$this->setValue($value);
 		$this->setConditional($conditional);
 		$this->setGlue($glue);
@@ -146,12 +146,19 @@ class CorePredicate {
 	public function setConditional($str) { $this->conditional = $str; }
 	public function setGlue($glue) { $this->glue = $glue; }
 
+	public function getProperty() { return $this->property; }
+	public function getValue() { return $this->value; }
+	public function getConditional() { return $this->conditional; }
+	public function getGlue() { return $this->glue; }
+
+}
+
+class CoreSort {
+	const ASCENDING = "ASC";
+	const DESCENDING = "DESC";
 }
 
 class CoreSortDescriptor {
-
-	const ASCENDING = "ASC";
-	const DESCENDING = "DESC";
 
 	private $property = null;
 	private $direction = null;
@@ -161,13 +168,16 @@ class CoreSortDescriptor {
 	* @property String $property a string representation of the property (field) to sort by
 	* @property Const $withDirection a String representation of the direction of the sort: ASCENDING / DESCENDING
 	*/
-	function CoreSort($property, $withDirection = self::ASCENDING) {
+	function CoreSortDescriptor($property, $withDirection = CoreSort::ASCENDING) {
 		$this->setProperty($property);
 		$this->setDirection($withDirection);
 	}
 
 	public function setProperty($property) { $this->property = $property; }
 	public function setDirection($withDirection) { $this->direction = $withDirection; }
+
+	public function getProperty() { return $this->property; }
+	public function getDirection() { return $this->direction; }
 
 }
 
@@ -197,7 +207,7 @@ class CoreFetchRequest {
 	* Creates a new CoreDB Fetch Request
 	* @property String $withEntityName the name of the Entity to request data from
 	*/
-	function CoreFetch($withEntityName = null) {
+	function CoreFetchRequest($withEntityName = null) {
 		$this->setEntity($withEntityName);
 	}
 
@@ -305,6 +315,7 @@ class CoreContext {
 	* 
 	*/
 	public function executeFetchRequest(CoreFetchRequest $request) {
+		
 		/// prepare select
 		$sql = "SELECT ";
 
@@ -321,7 +332,7 @@ class CoreContext {
 			
 			$predicates = array();
 			foreach($request->getPredicates() as $count=>$predicate)
-				$predicates[] = (( $count >= 1 )? $predicate->glue." " : null ).$predicate->field." ".$predicate->conditional." ".$predicate->value;
+				$predicates[] = (( $count >= 1 )? $predicate->getGlue()." " : null ).$predicate->getProperty()." ".$predicate->getConditional()." ".((is_int($predicate->getValue))? $predicate->getValue() : "'".$predicate->getValue()."'" );
 			
 			$sql .= " WHERE ".implode(" ", $predicates);
 
@@ -331,7 +342,7 @@ class CoreContext {
 
 			$descriptors = array();
 			foreach($request->getDescriptors() as $sort)
-				$descriptors[] = $sort->property." ".$sort->direction;
+				$descriptors[] = $sort->getProperty()." ".$sort->getDirection();
 
 			$sql .= " ORDER BY ".implode(",", $descriptors);
 		}
