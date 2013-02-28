@@ -15,13 +15,17 @@ class CoreDB {
 
 	}
 
+	public static function CreateContext($DatabasePath) {
+		return new CoreContext($DatabasePath);
+	}
+
 }
 
 class CoreError {
 	private $code = 0;
 	private $message = null;
 
-	public CoreError($code, $message) {
+	function CoreError($code, $message) {
 		$this->code = $code; 
 		$this->message = $message;
 	}
@@ -38,8 +42,8 @@ class CorePredicateCondition {
 }
 
 class CorePredicateGlue {
-	const AND = " AND ";
-	const OR  = " OR ";
+	const GLUEAND = " AND ";
+	const GLUEOR  = " OR ";
 }
 
 class CorePredicate {
@@ -65,7 +69,7 @@ class CorePredicate {
 	* @example new CorePredicate("id", 1); // would equal: WHERE `id` = 1;
 	* @example array(new CorePredicate("firstname", "Ron%", CorePredicate::LIKE), new CorePredicate("lastname", "Howard", CorePredicateCondition::EQUALS, CorePredicateGlue::AND)); // equivilent to: WHERE `firstname` LIKE "Ron%" AND `lastname` = "Howard"
 	*/
-	function CorePredicate($property, $value, $conditional = CorePRedicateCondition::EQUALS, $glue = CorePredicateGlue::AND) {
+	function CorePredicate($property, $value, $conditional = CorePRedicateCondition::EQUALS, $glue = CorePredicateGlue::GLUEAND) {
 		$this->setField($property);
 		$this->setValue($value);
 		$this->setConditional($conditional);
@@ -214,7 +218,7 @@ class CoreContext {
 	/**
 	* Establishes a connection to the sqlite3 database
 	*/
-	public CoreContext($DatabasePath) {
+	function CoreContext($DatabasePath) {
 
 	}
 
