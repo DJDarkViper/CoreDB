@@ -282,6 +282,10 @@ class CoreContext {
 
 	private $store;
 
+	private $models = array();
+
+	private $deletes = array();
+
 	/**
 	* Establishes a connection to the sqlite3 database
 	*/
@@ -305,9 +309,23 @@ class CoreContext {
 	*/
 	public function save() {
 
+		var_dump("From Save");
+		var_dump($this->models);
+
+	}
+
+
+	public function addModel($ref) {
+		$this->models[] = $ref;
 	}
 
 }
 
+class CoreModel {
 
+	public function __construct(CoreContext $context) {
+		$context->addModel(&$this);
+	}
+
+}
 
