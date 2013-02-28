@@ -215,10 +215,14 @@ class CoreFetchRequest {
 
 class CoreContext {
 
+	private $store;
+
 	/**
 	* Establishes a connection to the sqlite3 database
 	*/
 	function CoreContext($DatabasePath) {
+
+		$this->store = new SQLite3($_SERVER['DOCUMENT_ROOT']."/".$DatabasePath.".sqlite", SQLITE3_OPEN_READWRITE|SQLITE3_OPEN_CREATE);
 
 	}
 
@@ -236,5 +240,5 @@ class CoreContext {
 
 	}
 
-
 }
+
