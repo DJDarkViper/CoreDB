@@ -1,11 +1,11 @@
 <?
 /*
-	CoreDB
-	A "CoreData" inspired managed object SQLLess wrapper for SQLite3
-	Written by: Kyle Harrison
-	http://kyleharrison.ca
+CoreDB
+A "CoreData" inspired managed object SQLLess wrapper for SQLite3
+Written by: Kyle Harrison
+http://kyleharrison.ca
 
-	See: README.md for examples
+See: README.md for examples
 */
 
 // This function might actually be useless, we'll see.. or could be the Context, havent decided
@@ -135,7 +135,7 @@ class CorePredicate {
 	* @example array(new CorePredicate("firstname", "Ron%", CorePredicate::LIKE), new CorePredicate("lastname", "Howard", CorePredicateCondition::EQUALS, CorePredicateGlue::AND)); // equivilent to: WHERE `firstname` LIKE "Ron%" AND `lastname` = "Howard"
 	*/
 	function CorePredicate($property, $value, $conditional = CorePRedicateCondition::EQUALS, $glue = CorePredicateGlue::GLUEAND) {
-		$this->setField($property);
+		$this->setProperty($property);
 		$this->setValue($value);
 		$this->setConditional($conditional);
 		$this->setGlue($glue);
@@ -146,12 +146,19 @@ class CorePredicate {
 	public function setConditional($str) { $this->conditional = $str; }
 	public function setGlue($glue) { $this->glue = $glue; }
 
+	public function getProperty() { return $this->property; }
+	public function getValue() { return $this->value; }
+	public function getConditional() { return $this->conditional; }
+	public function getGlue() { return $this->glue; }
+
+}
+
+class CoreSort {
+	const ASCENDING = "ASC";
+	const DESCENDING = "DESC";
 }
 
 class CoreSortDescriptor {
-
-	const ASCENDING = "ASC";
-	const DESCENDING = "DESC";
 
 	private $property = null;
 	private $direction = null;
@@ -161,13 +168,16 @@ class CoreSortDescriptor {
 	* @property String $property a string representation of the property (field) to sort by
 	* @property Const $withDirection a String representation of the direction of the sort: ASCENDING / DESCENDING
 	*/
-	function CoreSort($property, $withDirection = self::ASCENDING) {
+	function CoreSortDescriptor($property, $withDirection = CoreSort::ASCENDING) {
 		$this->setProperty($property);
 		$this->setDirection($withDirection);
 	}
 
 	public function setProperty($property) { $this->property = $property; }
 	public function setDirection($withDirection) { $this->direction = $withDirection; }
+
+	public function getProperty() { return $this->property; }
+	public function getDirection() { return $this->direction; }
 
 }
 
@@ -197,7 +207,7 @@ class CoreFetchRequest {
 	* Creates a new CoreDB Fetch Request
 	* @property String $withEntityName the name of the Entity to request data from
 	*/
-	function CoreFetch($withEntityName = null) {
+	function CoreFetchRequest($withEntityName = null) {
 		$this->setEntity($withEntityName);
 	}
 
@@ -274,6 +284,10 @@ class CoreFetchRequest {
 		return $this;
 	}
 
+	public function getEntity() { return $this->entity; }
+	public function getPropertes() { return $this->properties; }
+	public function getDescriptors() { return $this->descriptors; }
+	public function getPredicates() { return $this->predicates; }
 
 }
 
@@ -301,6 +315,74 @@ class CoreContext {
 	* 
 	*/
 	public function executeFetchRequest(CoreFetchRequest $request) {
+		
+		/// prepare select
+		$sql = "SELECT ";
+
+		// get selected properties
+		if(count($request->getPropertes())>0) 
+			$sql .= implode(", ", $request->getPropertes());
+		else
+			$sql .= "*";
+
+		$sql .= " FROM ".$request->getEntity();
+
+		// check predicates
+		if(count($request->getPredicates())>0) {
+			
+			$predicates = array();
+			foreach($request->getPredicates() as $count=>$predicate)
+				$predicates[] = (( $count >= 1 )? $predicate->getGlue()." " : null ).$predicate->getProperty()." ".$predicate->getConditional()." ".((is_int($predicate->getValue))? $predicate->getValue() : "'".$predicate->getValue()."'" );
+			
+			$sql .= " WHERE ".implode(" ", $predicates);
+
+		}
+
+		if(count($request->getDescriptors())>0) {
+
+			$descriptors = array();
+			foreach($request->getDescriptors() as $sort)
+				$descriptors[] = $sort->getProperty()." ".$sort->getDirection();
+
+			$sql .= " ORDER BY ".implode(",", $descriptors);
+		}
+
+		
+		// execute the query
+
+		$sql = $this->store->query($sql);
+
+		$return = array();
+		while($rec = $sql->fetchArray(SQLITE3_ASSOC)) {
+
+			if(class_exists($request->getEntity(), true)) {
+				// we can use the host class
+
+				// get base entity
+				$en = $request->getEntity();
+
+				// use that to instantiate new ghost model
+				$n = new $en(&$this);
+
+				// populate the model with fetched information
+				foreach($rec as $k=>$v) $n->{$k} = $v;
+
+				// add
+				$return[] = $n;
+
+
+			} else {
+				// otherwise we will return the assoc array as an object
+				$return = (object)$rec;
+			}
+
+
+		}
+
+
+		// bring back all the infos
+		return $return;
+
 
 	}
 
