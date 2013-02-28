@@ -347,7 +347,41 @@ class CoreContext {
 			$sql .= " ORDER BY ".implode(",", $descriptors);
 		}
 
-		return $sql;
+		
+		// execute the query
+
+		$sql = $this->store->query($sql);
+
+		$return = array();
+		while($rec = $sql->fetchArray(SQLITE3_ASSOC)) {
+
+			if(class_exists($request->getEntity(), true)) {
+				// we can use the host class
+
+				// get base entity
+				$en = $request->getEntity();
+
+				// use that to instantiate new ghost model
+				$n = new $en(&$this);
+
+				// populate the model with fetched information
+				foreach($rec as $k=>$v) $n->{$k} = $v;
+
+				// add
+				$return[] = $n;
+
+
+			} else {
+				// otherwise we will return the assoc array as an object
+				$return = (object)$rec;
+			}
+
+
+		}
+
+
+		// bring back all the infos
+		return $return;
 
 
 	}

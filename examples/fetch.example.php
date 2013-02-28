@@ -62,9 +62,10 @@ $context->clear(); // cleanup
 ///
 ///  Now we have some data in the database, lets fetch some
 ///
-
+echo "<pre>";
 // Lets fetch ALL records with default settings
 $records = $context->executeFetchRequest(new CoreFetchRequest("Users"));
+
 
 var_dump($records);
 
