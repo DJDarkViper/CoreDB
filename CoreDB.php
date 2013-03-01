@@ -316,6 +316,34 @@ class CoreContext {
 	public function getStore() { return $this->store; }
 
 	/**
+	 * Pass a reference of a model or struct, and it will automatically create a table based on the data.
+	 * @property CoreModel $model A reference to a CoreModel object model
+	 * @property Boolean $deleteIfExists Will delete the table is it already exists, so as not to throw an exception due to a colission
+	 */
+	public function createEntityBasedOnModel($model, $deleteIfExists = true) {
+		
+		if($deleteIfExists)
+			$this->store->exec("DROP TABLE IF EXISTS ".get_class($model));
+			
+		$properties = array();
+		foreach($model as $property=>$value) {
+			$type = CoreEntityProperty::TEXT;
+			
+			if($property == "id" || is_int($value)) $type = CoreEntityProperty::NUMBER;
+			else if(is_string($value)) $type = CoreEntityProperty::TEXT;
+			else $type = CoreEntityProperty::
+			
+			$properties[] = CoreEntityProperty::Create($property, $type, (($property == "id")? true : false ) );
+		}
+			
+		$db = CoreDB::CreateEntity(&$this, 
+			CoreEntityDescription::Create(get_class($model), $properties)
+		);
+		
+	}
+	
+
+	/**
 	* 
 	*/
 	public function executeFetchRequest(CoreFetchRequest $request) {
