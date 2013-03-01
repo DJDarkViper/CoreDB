@@ -30,8 +30,26 @@ Download the latest stable version. You only need CoreDB.php, place it pretty mu
 I highly recommend using tools like [Navicat Premium](http://www.navicat.com/en/products/navicat_premium/premium_overview.html), [NaviCat for SQLite](http://www.navicat.com/en/products/navicat_sqlite/sqlite_overview.html), or [PHPLiteAdmin](https://code.google.com/p/phpliteadmin/) to create and manage the structure of your SQLite databases easier. 
 
 
-Usage
+Setup 
 -----
+CoreDB is "SetupLess", that means you only need to include the CoreDB.php file in your application when you want to use it. 
+The only thing CoreDB needs to operate, is a writable directory, though this plans to be automatic as well in the near future to completely acheive this goal.
+
+Though you can use CoreDB to create and manage tables ("Entities"), it IS however highly recommended to use the tools mentioned above to create your database structure in the first place. Though, not required. See the [CreateTables Example](https://github.com/DJDarkViper/CoreDB/blob/master/examples/createtable.example.php) to see how to create a table with CoreDB.
+
+To get everything going, you need to create a context, this is a one line operatation: 
+
+```
+$context = CoreDB::CreateContext("db");
+```
+This will open and manage an existing SQLite3 database, or create an empty one if it doesnt exist. 
+To use the rest of what CoreDB has to offer, simply pass a reference to the context where asked!
+
+In PHP to pass a reference, you prepend a & to the variable name, so "&$context"
+
+
+Use Example
+-----------
 
 CoreDB is a SQLess wrapper for SQLite3 Databases. That means that CoreDB will manage all operations of your sites communication with stored data via "Managed Object" structs. 
 
